@@ -10,16 +10,18 @@ from torch_geometric.loader import NeighborLoader
 from torch_geometric.testing import onlyLinux, onlyNeighborSampler
 
 
-@pytest.mark.xfail(reason="TODO: Fix test")
+@pytest.mark.xfail(reason='TODO: Fix test')
 @onlyLinux
 @onlyNeighborSampler
 @pytest.mark.skipif(
-    psutil.cpu_count(logical=False) == 1, reason="Requires multiple CPU cores")
+    psutil.cpu_count(logical=False) == 1, reason='Requires multiple CPU cores'
+)
 @pytest.mark.parametrize('loader_cores', [None, [1, 2]])
 def test_cpu_affinity_neighbor_loader(loader_cores, spawn_context):
     data = Data(x=torch.randn(1, 1))
-    loader = NeighborLoader(data, num_neighbors=[-1], batch_size=1,
-                            num_workers=2)
+    loader = NeighborLoader(
+        data, num_neighbors=[-1], batch_size=1, num_workers=2
+    )
     out = []
     with loader.enable_cpu_affinity(loader_cores):
         iterator = loader._get_iterator()
@@ -27,8 +29,8 @@ def test_cpu_affinity_neighbor_loader(loader_cores, spawn_context):
         sleep(3)  # Gives time for worker to initialize.
         for worker in workers:
             process = subprocess.Popen(
-                ['taskset', '-c', '-p', f'{worker.pid}'],
-                stdout=subprocess.PIPE)
+                ['taskset', '-c', '-p', f'{worker.pid}'], stdout=subprocess.PIPE
+            )
             stdout = process.communicate()[0].decode('utf-8')
             # returns "pid <pid>'s current affinity list <n>-<m>"
             out.append(stdout.split(':')[1].strip())
@@ -45,7 +47,8 @@ def init_fn(worker_id):
 @onlyLinux
 @onlyNeighborSampler
 @pytest.mark.skipif(
-    psutil.cpu_count(logical=False) == 1, reason="Requires multiple CPU cores")
+    psutil.cpu_count(logical=False) == 1, reason='Requires multiple CPU cores'
+)
 def test_multithreading_neighbor_loader(spawn_context):
     loader = NeighborLoader(
         data=Data(x=torch.randn(1, 1)),

@@ -38,8 +38,16 @@ def test_gcn(out_dim, dropout, act, norm, jk):
     edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
     out_channels = 16 if out_dim is None else out_dim
 
-    model = GCN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
-                act=act, norm=norm, jk=jk)
+    model = GCN(
+        8,
+        16,
+        num_layers=3,
+        out_channels=out_dim,
+        dropout=dropout,
+        act=act,
+        norm=norm,
+        jk=jk,
+    )
     assert str(model) == f'GCN(8, {out_channels}, num_layers=3)'
     assert model(x, edge_index).size() == (3, out_channels)
 
@@ -54,8 +62,16 @@ def test_graph_sage(out_dim, dropout, act, norm, jk):
     edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
     out_channels = 16 if out_dim is None else out_dim
 
-    model = GraphSAGE(8, 16, num_layers=3, out_channels=out_dim,
-                      dropout=dropout, act=act, norm=norm, jk=jk)
+    model = GraphSAGE(
+        8,
+        16,
+        num_layers=3,
+        out_channels=out_dim,
+        dropout=dropout,
+        act=act,
+        norm=norm,
+        jk=jk,
+    )
     assert str(model) == f'GraphSAGE(8, {out_channels}, num_layers=3)'
     assert model(x, edge_index).size() == (3, out_channels)
 
@@ -70,8 +86,16 @@ def test_gin(out_dim, dropout, act, norm, jk):
     edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
     out_channels = 16 if out_dim is None else out_dim
 
-    model = GIN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
-                act=act, norm=norm, jk=jk)
+    model = GIN(
+        8,
+        16,
+        num_layers=3,
+        out_channels=out_dim,
+        dropout=dropout,
+        act=act,
+        norm=norm,
+        jk=jk,
+    )
     assert str(model) == f'GIN(8, {out_channels}, num_layers=3)'
     assert model(x, edge_index).size() == (3, out_channels)
 
@@ -87,13 +111,32 @@ def test_gat(out_dim, dropout, act, norm, jk):
     out_channels = 16 if out_dim is None else out_dim
 
     for v2 in [False, True]:
-        model = GAT(8, 16, num_layers=3, out_channels=out_dim, v2=v2,
-                    dropout=dropout, act=act, norm=norm, jk=jk)
+        model = GAT(
+            8,
+            16,
+            num_layers=3,
+            out_channels=out_dim,
+            v2=v2,
+            dropout=dropout,
+            act=act,
+            norm=norm,
+            jk=jk,
+        )
         assert str(model) == f'GAT(8, {out_channels}, num_layers=3)'
         assert model(x, edge_index).size() == (3, out_channels)
 
-        model = GAT(8, 16, num_layers=3, out_channels=out_dim, v2=v2,
-                    dropout=dropout, act=act, norm=norm, jk=jk, heads=4)
+        model = GAT(
+            8,
+            16,
+            num_layers=3,
+            out_channels=out_dim,
+            v2=v2,
+            dropout=dropout,
+            act=act,
+            norm=norm,
+            jk=jk,
+            heads=4,
+        )
         assert str(model) == f'GAT(8, {out_channels}, num_layers=3)'
         assert model(x, edge_index).size() == (3, out_channels)
 
@@ -110,12 +153,26 @@ def test_pna(out_dim, dropout, act, norm, jk):
     out_channels = 16 if out_dim is None else out_dim
     aggregators = ['mean', 'min', 'max', 'std', 'var', 'sum']
     scalers = [
-        'identity', 'amplification', 'attenuation', 'linear', 'inverse_linear'
+        'identity',
+        'amplification',
+        'attenuation',
+        'linear',
+        'inverse_linear',
     ]
 
-    model = PNA(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
-                act=act, norm=norm, jk=jk, aggregators=aggregators,
-                scalers=scalers, deg=deg)
+    model = PNA(
+        8,
+        16,
+        num_layers=3,
+        out_channels=out_dim,
+        dropout=dropout,
+        act=act,
+        norm=norm,
+        jk=jk,
+        aggregators=aggregators,
+        scalers=scalers,
+        deg=deg,
+    )
     assert str(model) == f'PNA(8, {out_channels}, num_layers=3)'
     assert model(x, edge_index).size() == (3, out_channels)
 
@@ -130,8 +187,16 @@ def test_edge_cnn(out_dim, dropout, act, norm, jk):
     edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
     out_channels = 16 if out_dim is None else out_dim
 
-    model = EdgeCNN(8, 16, num_layers=3, out_channels=out_dim, dropout=dropout,
-                    act=act, norm=norm, jk=jk)
+    model = EdgeCNN(
+        8,
+        16,
+        num_layers=3,
+        out_channels=out_dim,
+        dropout=dropout,
+        act=act,
+        norm=norm,
+        jk=jk,
+    )
     assert str(model) == f'EdgeCNN(8, {out_channels}, num_layers=3)'
     assert model(x, edge_index).size() == (3, out_channels)
 
@@ -157,12 +222,15 @@ def test_one_layer_gnn(out_dim, jk):
     assert model(x, edge_index).size() == (3, out_channels)
 
 
-@pytest.mark.parametrize('norm', [
-    'BatchNorm',
-    'GraphNorm',
-    'InstanceNorm',
-    'LayerNorm',
-])
+@pytest.mark.parametrize(
+    'norm',
+    [
+        'BatchNorm',
+        'GraphNorm',
+        'InstanceNorm',
+        'LayerNorm',
+    ],
+)
 def test_batch(norm):
     x = torch.randn(3, 8)
     edge_index = torch.tensor([[0, 1, 1, 2], [1, 0, 2, 1]])
@@ -175,7 +243,7 @@ def test_batch(norm):
     assert out.size() == (3, 16)
 
     if model.supports_norm_batch:
-        with pytest.raises(RuntimeError, match="out of bounds"):
+        with pytest.raises(RuntimeError, match='out of bounds'):
             model(x, edge_index, batch=batch, batch_size=1)
 
 
@@ -186,8 +254,13 @@ def test_basic_gnn_inference(get_dataset, jk):
     dataset = get_dataset(name='karate')
     data = dataset[0]
 
-    model = GraphSAGE(dataset.num_features, hidden_channels=16, num_layers=2,
-                      out_channels=dataset.num_classes, jk=jk)
+    model = GraphSAGE(
+        dataset.num_features,
+        hidden_channels=16,
+        num_layers=2,
+        out_channels=dataset.num_classes,
+        jk=jk,
+    )
     model.eval()
 
     out1 = model(data.x, data.edge_index)
@@ -292,9 +365,12 @@ def test_onnx(tmp_path: str) -> None:
         # ONNX export was skipped due to known upstream issue
         # This allows CI to pass while the upstream bug exists
         warnings.warn(
-            "ONNX export test skipped due to known upstream onnx_ir issue. "
-            "This is expected and does not indicate a problem with PyTorch "
-            "Geometric.", UserWarning, stacklevel=2)
+            'ONNX export test skipped due to known upstream onnx_ir issue. '
+            'This is expected and does not indicate a problem with PyTorch '
+            'Geometric.',
+            UserWarning,
+            stacklevel=2,
+        )
         return
 
     onnx_model = onnx.load(path)
@@ -303,10 +379,9 @@ def test_onnx(tmp_path: str) -> None:
     providers = ['CPUExecutionProvider']
     ort_session = ort.InferenceSession(path, providers=providers)
 
-    out = ort_session.run(None, {
-        'x': x.numpy(),
-        'edge_index': edge_index.numpy()
-    })[0]
+    out = ort_session.run(
+        None, {'x': x.numpy(), 'edge_index': edge_index.numpy()}
+    )[0]
     out = torch.from_numpy(out)
     assert torch.allclose(out, expected, atol=1e-6)
 
@@ -314,10 +389,12 @@ def test_onnx(tmp_path: str) -> None:
 @withPackage('pyg_lib')
 def test_trim_to_layer():
     x = torch.randn(14, 16)
-    edge_index = torch.tensor([
-        [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
-        [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
-    ])
+    edge_index = torch.tensor(
+        [
+            [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
+            [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
+        ]
+    )
     data = Data(x=x, edge_index=edge_index)
 
     loader = NeighborLoader(
@@ -377,10 +454,12 @@ def test_compile_graph_breaks(Model, device):
 @withPackage('pyg_lib')
 def test_basic_gnn_cache():
     x = torch.randn(14, 16)
-    edge_index = torch.tensor([
-        [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
-        [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
-    ])
+    edge_index = torch.tensor(
+        [
+            [2, 3, 4, 5, 7, 7, 10, 11, 12, 13],
+            [0, 1, 2, 3, 2, 3, 7, 7, 7, 7],
+        ]
+    )
 
     loader = NeighborLoader(
         Data(x=x, edge_index=edge_index),
