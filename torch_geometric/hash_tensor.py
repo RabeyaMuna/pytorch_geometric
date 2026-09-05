@@ -41,12 +41,22 @@ def as_key_tensor(
     *,
     device: Optional[torch.device] = None,
 ) -> Tensor:
+    # Handle single string key
+    if isinstance(key, str):
+        key = [key]
+
     try:
         key = torch.as_tensor(key, device=device)
     except Exception:
         device = device or torch.get_default_device()
+
+        def _to_hashable(x):
+            if isinstance(x, str):
+                return xxhash.xxh64(x.encode('utf-8')).intdigest() & 0x7FFFFFFFFFFFFFFF
+            return xxhash.xxh64(x).intdigest() & 0x7FFFFFFFFFFFFFFF
+
         key = torch.tensor(
-            [xxhash.xxh64(x).intdigest() & 0x7FFFFFFFFFFFFFFF for x in key],
+            [_to_hashable(x) for x in key],
             dtype=torch.int64, device=device)
 
     if key.element_size() == 1:
