@@ -4,7 +4,6 @@ from unittest.mock import Mock
 
 import pytest
 import torch
-
 from torch_geometric.nn import GCN
 from torch_geometric.nn.model_hub import PyGModelHubMixin
 from torch_geometric.testing import withPackage
@@ -29,9 +28,10 @@ def model():
 @withPackage('huggingface_hub')
 def test_model_init():
     model = DummyModel(
-        MODEL_NAME, DATASET_NAME, model_kwargs={
-            **CONFIG, 'tensor': torch.randn([1, 2, 3])
-        })
+        MODEL_NAME,
+        DATASET_NAME,
+        model_kwargs={**CONFIG, 'tensor': torch.randn([1, 2, 3])},
+    )
     assert model.model_config == CONFIG
 
 
@@ -66,8 +66,9 @@ def test_save_pretrained_with_push_to_hub(model, tmp_path):
     model.construct_model_card.assert_called_with(MODEL_NAME, DATASET_NAME)
 
     # Push to hub with repo_id
-    model.save_pretrained(save_directory, push_to_hub=True, repo_id='CustomID',
-                          config=CONFIG)
+    model.save_pretrained(
+        save_directory, push_to_hub=True, repo_id='CustomID', config=CONFIG
+    )
     model.push_to_hub.assert_called_with(
         repo_id='CustomID',
         model_card_kwargs={},
@@ -88,17 +89,20 @@ def test_from_pretrained(model, tmp_path):
     save_directory = f'{str(tmp_path / REPO_NAME)}'
     model.save_pretrained(save_directory)
 
-    model = model.from_pretrained(save_directory)
+    model = model.__class__.from_pretrained(save_directory)
     assert isinstance(model, DummyModel)
 
 
 @withPackage('huggingface_hub')
 def test_from_pretrained_internal(model, monkeypatch):
     hf_hub_download = Mock(side_effect='model')
-    monkeypatch.setattr('torch_geometric.nn.model_hub.hf_hub_download',
-                        hf_hub_download)
-    monkeypatch.setattr('torch_geometric.nn.model_hub.fs.torch_load',
-                        lambda x, **kwargs: {'state_dict': 1})
+    monkeypatch.setattr(
+        'torch_geometric.nn.model_hub.hf_hub_download', hf_hub_download
+    )
+    monkeypatch.setattr(
+        'torch_geometric.nn.model_hub.fs.torch_load',
+        lambda x, **kwargs: {'state_dict': 1},
+    )
 
     model = model._from_pretrained(
         model_id=MODEL_NAME,

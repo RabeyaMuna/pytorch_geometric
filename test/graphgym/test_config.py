@@ -1,6 +1,16 @@
 from dataclasses import dataclass
 
-from torch_geometric.graphgym.config import from_config
+
+def _lazy_from_config(*args, **kwargs):
+    # Defer importing heavy third-party code until the function is actually called
+    from torch_geometric.graphgym.config import from_config as _real_from_config
+
+    # Replace the proxy with the real function for subsequent calls
+    globals()['from_config'] = _real_from_config
+    return _real_from_config(*args, **kwargs)
+
+
+from_config = _lazy_from_config
 
 
 @dataclass

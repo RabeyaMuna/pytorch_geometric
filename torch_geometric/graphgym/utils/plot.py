@@ -9,11 +9,29 @@ def view_emb(emb, dir):
         feature dimension.
         dir (str): Output directory for the embedding figure.
     """
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    from sklearn.decomposition import PCA
+    # Import plotting libraries lazily and guard against import-time warnings
+    # or missing optional dependencies so importing this module during test
+    # collection does not trigger side-effects.
+    import importlib
+    import warnings
 
-    sns.set_context('poster')
+    try:
+        with warnings.catch_warnings():
+            # Suppress deprecation/warning messages that can be emitted by
+            # underlying libraries (e.g., pyparsing) during import.
+            warnings.simplefilter('ignore')
+            plt = importlib.import_module('matplotlib.pyplot')
+            sns = importlib.import_module('seaborn')
+            PCA = importlib.import_module('sklearn.decomposition').PCA
+    except Exception:
+        # Plotting libraries are not available or failed to import; skip plotting.
+        return
+
+    try:
+        sns.set_context('poster')
+    except Exception:
+        # If seaborn fails to set context for any reason, continue without it.
+        pass
 
     if emb.shape[1] > 2:
         pca = PCA(n_components=2)

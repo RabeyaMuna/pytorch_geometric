@@ -5,7 +5,6 @@ import pytest
 import torch
 import torch.nn.functional as F
 from torch import Tensor
-
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.data.lightning import (
     LightningDataset,
@@ -33,8 +32,9 @@ except ImportError:
 
 
 class LinearGraphModule(LightningModule):
-    def __init__(self, in_channels: int, hidden_channels: int,
-                 out_channels: int):
+    def __init__(
+        self, in_channels: int, hidden_channels: int, out_channels: int
+    ):
         super().__init__()
         from torchmetrics import Accuracy
 
@@ -79,7 +79,7 @@ class LinearGraphModule(LightningModule):
 @onlyCUDA
 @onlyOnline
 @onlyFullTest
-@withPackage('pytorch_lightning>=2.0.0', 'torchmetrics>=0.11.0')
+@withPackage('pytorch_lightning>=2.0.0')
 @pytest.mark.parametrize('strategy_type', [None, 'ddp'])
 def test_lightning_dataset(get_dataset, strategy_type):
     import pytorch_lightning as pl
@@ -107,26 +107,37 @@ def test_lightning_dataset(get_dataset, strategy_type):
 
     model = LinearGraphModule(dataset.num_features, 64, dataset.num_classes)
 
-    trainer = pl.Trainer(strategy=strategy, devices=devices, max_epochs=1,
-                         log_every_n_steps=1)
+    trainer = pl.Trainer(
+        strategy=strategy, devices=devices, max_epochs=1, log_every_n_steps=1
+    )
     with pytest.warns(UserWarning, match="'shuffle=True' option is ignored"):
-        datamodule = LightningDataset(train_dataset, val_dataset, test_dataset,
-                                      pred_dataset, batch_size=5,
-                                      num_workers=3, shuffle=True)
+        datamodule = LightningDataset(
+            train_dataset,
+            val_dataset,
+            test_dataset,
+            pred_dataset,
+            batch_size=5,
+            num_workers=3,
+            shuffle=True,
+        )
         assert 'shuffle' not in datamodule.kwargs
     old_x = train_dataset._data.x.clone()
     if has_package('pytorch_lightning>=2.5.0'):
-        datamodule_repr = ('{Train dataloader: size=50}\n'
-                           '{Validation dataloader: size=30}\n'
-                           '{Test dataloader: size=10}\n'
-                           '{Predict dataloader: size=98}')
+        datamodule_repr = (
+            '{Train dataloader: size=50}\n'
+            '{Validation dataloader: size=30}\n'
+            '{Test dataloader: size=10}\n'
+            '{Predict dataloader: size=98}'
+        )
     else:
-        datamodule_repr = ('LightningDataset(train_dataset=MUTAG(50), '
-                           'val_dataset=MUTAG(30), '
-                           'test_dataset=MUTAG(10), '
-                           'pred_dataset=MUTAG(98), batch_size=5, '
-                           'num_workers=3, pin_memory=True, '
-                           'persistent_workers=True)')
+        datamodule_repr = (
+            'LightningDataset(train_dataset=MUTAG(50), '
+            'val_dataset=MUTAG(30), '
+            'test_dataset=MUTAG(10), '
+            'pred_dataset=MUTAG(98), batch_size=5, '
+            'num_workers=3, pin_memory=True, '
+            'persistent_workers=True)'
+        )
     assert str(datamodule) == datamodule_repr
 
     trainer.fit(model, datamodule)
@@ -138,23 +149,31 @@ def test_lightning_dataset(get_dataset, strategy_type):
 
     # Test with `val_dataset=None` and `test_dataset=None`:
     if strategy_type is None:
-        trainer = pl.Trainer(strategy=strategy, devices=devices, max_epochs=1,
-                             log_every_n_steps=1)
+        trainer = pl.Trainer(
+            strategy=strategy,
+            devices=devices,
+            max_epochs=1,
+            log_every_n_steps=1,
+        )
 
         datamodule = LightningDataset(train_dataset, batch_size=5)
         if has_package('pytorch_lightning>=2.5.0'):
-            datamodule_repr = ('{Train dataloader: size=50}\n'
-                               '{Validation dataloader: None}\n'
-                               '{Test dataloader: None}\n{'
-                               'Predict dataloader: None}')
+            datamodule_repr = (
+                '{Train dataloader: size=50}\n'
+                '{Validation dataloader: None}\n'
+                '{Test dataloader: None}\n{'
+                'Predict dataloader: None}'
+            )
         else:
-            datamodule_repr = ('LightningDataset(train_dataset=MUTAG(50), '
-                               'batch_size=5, num_workers=0, '
-                               'pin_memory=True, '
-                               'persistent_workers=False)')
+            datamodule_repr = (
+                'LightningDataset(train_dataset=MUTAG(50), '
+                'batch_size=5, num_workers=0, '
+                'pin_memory=True, '
+                'persistent_workers=False)'
+            )
         assert str(datamodule) == datamodule_repr
 
-        with expect_rank_zero_user_warning("defined a `validation_step`"):
+        with expect_rank_zero_user_warning('defined a `validation_step`'):
             trainer.fit(model, datamodule)
 
         assert not trainer.validate_loop._data_source.is_defined()
@@ -207,7 +226,7 @@ class LinearNodeModule(LightningModule):
 @onlyOnline
 @onlyFullTest
 @onlyNeighborSampler
-@withPackage('pytorch_lightning>=2.0.0', 'torchmetrics>=0.11.0', 'scipy')
+@withPackage('pytorch_lightning>=2.0.0', 'scipy')
 @pytest.mark.parametrize('loader', ['full', 'neighbor'])
 @pytest.mark.parametrize('strategy_type', [None, 'ddp'])
 def test_lightning_node_data(get_dataset, strategy_type, loader):
@@ -215,8 +234,10 @@ def test_lightning_node_data(get_dataset, strategy_type, loader):
 
     dataset = get_dataset(name='Cora')
     data = dataset[0]
-    data_repr = ('Data(x=[2708, 1433], edge_index=[2, 10556], y=[2708], '
-                 'train_mask=[2708], val_mask=[2708], test_mask=[2708])')
+    data_repr = (
+        'Data(x=[2708, 1433], edge_index=[2, 10556], y=[2708], '
+        'train_mask=[2708], val_mask=[2708], test_mask=[2708])'
+    )
 
     model = LinearNodeModule(dataset.num_features, dataset.num_classes)
 
@@ -241,10 +262,16 @@ def test_lightning_node_data(get_dataset, strategy_type, loader):
         kwargs['num_neighbors'] = [5]
         kwargs_repr += 'num_neighbors=[5], '
 
-    trainer = pl.Trainer(strategy=strategy, devices=devices, max_epochs=5,
-                         log_every_n_steps=1)
-    datamodule = LightningNodeData(data, loader=loader, batch_size=batch_size,
-                                   num_workers=num_workers, **kwargs)
+    trainer = pl.Trainer(
+        strategy=strategy, devices=devices, max_epochs=5, log_every_n_steps=1
+    )
+    datamodule = LightningNodeData(
+        data,
+        loader=loader,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        **kwargs,
+    )
 
     old_x = data.x.clone().cpu()
     flag = loader != 'full'
@@ -253,13 +280,16 @@ def test_lightning_node_data(get_dataset, strategy_type, loader):
             '{Train dataloader: ' + f'size={140 if flag else 1}' + '}\n'
             '{Validation dataloader: ' + f'size={500 if flag else 1}' + '}\n'
             '{Test dataloader: ' + f'size={1000 if flag else 1}' + '}\n'
-            '{Predict dataloader: ' + f'size={2708 if flag else 1}' + '}')
+            '{Predict dataloader: ' + f'size={2708 if flag else 1}' + '}'
+        )
     else:
-        datamodule_repr = (f'LightningNodeData(data={data_repr}, '
-                           f'loader={loader}, batch_size={batch_size}, '
-                           f'num_workers={num_workers}, {kwargs_repr}'
-                           f'pin_memory={flag}, '
-                           f'persistent_workers={flag})')
+        datamodule_repr = (
+            f'LightningNodeData(data={data_repr}, '
+            f'loader={loader}, batch_size={batch_size}, '
+            f'num_workers={num_workers}, {kwargs_repr}'
+            f'pin_memory={flag}, '
+            f'persistent_workers={flag})'
+        )
     assert str(datamodule) == datamodule_repr
 
     trainer.fit(model, datamodule)
@@ -324,22 +354,25 @@ def preserve_context():
 @onlyCUDA
 @onlyFullTest
 @onlyNeighborSampler
-@withPackage('pytorch_lightning>=2.0.0', 'torchmetrics>=0.11.0')
+@withPackage('pytorch_lightning>=2.0.0')
 def test_lightning_hetero_node_data(preserve_context, get_dataset):
     import pytorch_lightning as pl
 
     data = get_dataset(name='hetero')[0]
 
-    model = LinearHeteroNodeModule(data['paper'].num_features,
-                                   int(data['paper'].y.max()) + 1)
+    model = LinearHeteroNodeModule(
+        data['paper'].num_features, int(data['paper'].y.max()) + 1
+    )
 
     devices = torch.cuda.device_count()
     strategy = pl.strategies.DDPStrategy(accelerator='gpu')
 
-    trainer = pl.Trainer(strategy=strategy, devices=devices, max_epochs=5,
-                         log_every_n_steps=1)
-    datamodule = LightningNodeData(data, loader='neighbor', num_neighbors=[5],
-                                   batch_size=32, num_workers=3)
+    trainer = pl.Trainer(
+        strategy=strategy, devices=devices, max_epochs=5, log_every_n_steps=1
+    )
+    datamodule = LightningNodeData(
+        data, loader='neighbor', num_neighbors=[5], batch_size=32, num_workers=3
+    )
     assert isinstance(datamodule.graph_sampler, NeighborSampler)
     original_x = data['paper'].x.clone()
     trainer.fit(model, datamodule)
@@ -360,13 +393,16 @@ def test_lightning_data_custom_sampler():
 
     data = Data(num_nodes=2, edge_index=torch.tensor([[0, 1], [1, 0]]))
 
-    datamodule = LightningNodeData(data, node_sampler=DummySampler(),
-                                   input_train_nodes=torch.arange(2))
+    datamodule = LightningNodeData(
+        data, node_sampler=DummySampler(), input_train_nodes=torch.arange(2)
+    )
     assert isinstance(datamodule.graph_sampler, DummySampler)
 
     datamodule = LightningLinkData(
-        data, link_sampler=DummySampler(),
-        input_train_edges=torch.tensor([[0, 1], [0, 1]]))
+        data,
+        link_sampler=DummySampler(),
+        input_train_edges=torch.tensor([[0, 1], [0, 1]]),
+    )
     assert isinstance(datamodule.graph_sampler, DummySampler)
 
 
@@ -446,15 +482,24 @@ def test_lightning_hetero_link_data_custom_store():
     feature_store.put_tensor(x, group_name='term', attr_name='x', index=None)
 
     edge_index = get_random_edge_index(10, 10, 10)
-    graph_store.put_edge_index(edge_index=(edge_index[0], edge_index[1]),
-                               edge_type=('paper', 'to', 'author'),
-                               layout='coo', size=(10, 10))
-    graph_store.put_edge_index(edge_index=(edge_index[0], edge_index[1]),
-                               edge_type=('author', 'to', 'paper'),
-                               layout='coo', size=(10, 10))
-    graph_store.put_edge_index(edge_index=(edge_index[0], edge_index[1]),
-                               edge_type=('paper', 'to', 'term'), layout='coo',
-                               size=(10, 10))
+    graph_store.put_edge_index(
+        edge_index=(edge_index[0], edge_index[1]),
+        edge_type=('paper', 'to', 'author'),
+        layout='coo',
+        size=(10, 10),
+    )
+    graph_store.put_edge_index(
+        edge_index=(edge_index[0], edge_index[1]),
+        edge_type=('author', 'to', 'paper'),
+        layout='coo',
+        size=(10, 10),
+    )
+    graph_store.put_edge_index(
+        edge_index=(edge_index[0], edge_index[1]),
+        edge_type=('paper', 'to', 'term'),
+        layout='coo',
+        size=(10, 10),
+    )
 
     datamodule = LightningLinkData(
         (feature_store, graph_store),
