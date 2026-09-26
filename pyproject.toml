@@ -202,6 +202,7 @@ filterwarnings = [
     # Filter `pytorch_lightning` warnings:
     "ignore:GPU available but not used:UserWarning",
     "error::DeprecationWarning",
+    "ignore::pyparsing.PyparsingDeprecationWarning",
 ]
 markers = [
     "rag: mark test as RAG test",

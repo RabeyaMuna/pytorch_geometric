@@ -32,3 +32,8 @@ uv.lock
 
 !torch_geometric/data/
 !test/data/
+# Shell redirection artifacts
+=[0-9]*
+>[0-9]*
+*.tmp
+*.log

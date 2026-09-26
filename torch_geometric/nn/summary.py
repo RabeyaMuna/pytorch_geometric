@@ -167,4 +167,4 @@ def make_table(info_list: List[dict], max_depth: int) -> str:
             info['output_shape'],
             info['#param'],
         ])
-    return tabulate(content, headers='firstrow', tablefmt='psql')
+    return tabulate(content, headers='firstrow', tablefmt='psql', disable_numparse=True)
