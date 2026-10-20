@@ -1,6 +1,5 @@
 from .contrib import *  # noqa
 from .models import *  # noqa
-from .utils import *  # noqa
 from .checkpoint import load_ckpt, save_ckpt, remove_ckpt, clean_ckpt
 from .cmd_args import parse_args
 from .config import (cfg, set_cfg, load_cfg, dump_cfg, set_run_dir,
@@ -18,6 +17,7 @@ from .register import (register_base, register_act, register_node_encoder,
                        register_config, register_dataset, register_loader,
                        register_optimizer, register_scheduler, register_loss,
                        register_train, register_metric)
+
 
 __all__ = classes = [
     'load_ckpt',
@@ -59,3 +59,12 @@ __all__ = classes = [
     'register_train',
     'register_metric',
 ]
+
+
+def __getattr__(name):
+    # Lazy import of `torch_geometric.graphgym.utils` to avoid importing
+    # heavy optional dependencies (e.g., `pytorch_lightning`, `matplotlib`)
+    # at package import time:
+    from . import utils
+    if hasattr(utils, name):
+        return getattr(utils, name)

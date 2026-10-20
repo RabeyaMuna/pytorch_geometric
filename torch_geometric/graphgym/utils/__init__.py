@@ -1,9 +1,16 @@
 from .agg_runs import agg_runs, agg_batch
-from .comp_budget import params_count, match_baseline_cfg
 from .device import get_current_gpu_usage, auto_select_device
 from .epoch import is_eval_epoch, is_ckpt_epoch
 from .io import dict_to_json, dict_list_to_json, dict_to_tb, makedirs_rm_exist
 from .tools import dummy_context
+
+
+def __getattr__(name):
+    if name in ('params_count', 'match_baseline_cfg'):
+        from .comp_budget import params_count, match_baseline_cfg
+        return {'params_count': params_count,
+                'match_baseline_cfg': match_baseline_cfg}[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     'agg_runs',

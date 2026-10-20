@@ -46,7 +46,10 @@ def as_key_tensor(
     except Exception:
         device = device or torch.get_default_device()
         key = torch.tensor(
-            [xxhash.xxh64(x).intdigest() & 0x7FFFFFFFFFFFFFFF for x in key],
+            [
+                xxhash.xxh64(x.encode() if isinstance(x, str) else x).intdigest()
+                & 0x7FFFFFFFFFFFFFFF for x in key
+            ],
             dtype=torch.int64, device=device)
 
     if key.element_size() == 1:

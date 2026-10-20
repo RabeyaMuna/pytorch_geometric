@@ -3,11 +3,26 @@ import warnings
 import torch
 
 try:
-    import pytorch_lightning as pl
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        try:
+            from pyparsing import PyparsingDeprecationWarning
+            warnings.simplefilter('ignore', PyparsingDeprecationWarning)
+        except ImportError:
+            pass
+        try:
+            import warnings
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', category=DeprecationWarning)
+        import pytorch_lightning as pl
+        except Exception:
+            raise ImportError
     _pl_is_available = True
 except ImportError:
     try:
-        import lightning.pytorch as pl
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            import lightning.pytorch as pl
         _pl_is_available = True
     except ImportError:
         _pl_is_available = False

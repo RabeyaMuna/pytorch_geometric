@@ -88,7 +88,8 @@ def test_from_pretrained(model, tmp_path):
     save_directory = f'{str(tmp_path / REPO_NAME)}'
     model.save_pretrained(save_directory)
 
-    model = model.from_pretrained(save_directory)
+    model = model.from_pretrained(save_directory, proxies=None,
+                                  resume_download=False)
     assert isinstance(model, DummyModel)
 
 

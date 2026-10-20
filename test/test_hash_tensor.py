@@ -91,8 +91,8 @@ def test_empty(dtype, device):
 @withCUDA
 @withHashTensor
 def test_string_key(device):
-    tensor = HashTensor(['1', '2', '3'], device=device)
-    out = tensor[['3', '2', '4']]
+    tensor = HashTensor([b'1', b'2', b'3'], device=device)
+    out = tensor[[b'3', b'2', b'4']]
     assert out.equal(torch.tensor([2, 1, -1], device=device))
 
 

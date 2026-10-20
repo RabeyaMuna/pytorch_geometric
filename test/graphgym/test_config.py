@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from torch_geometric.graphgym.config import from_config
+from torch_geometric.graphgym.config import from_config  # noqa: E402
 
 
 @dataclass

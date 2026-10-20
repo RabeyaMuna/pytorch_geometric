@@ -4,7 +4,6 @@ from typing import Any, Dict, Tuple
 import torch
 
 from torch_geometric.graphgym.config import cfg
-from torch_geometric.graphgym.imports import LightningModule
 from torch_geometric.graphgym.loss import compute_loss
 from torch_geometric.graphgym.models.gnn import GNN
 from torch_geometric.graphgym.optim import create_optimizer, create_scheduler
