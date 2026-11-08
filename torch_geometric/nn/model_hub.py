@@ -141,13 +141,13 @@ class PyGModelHubMixin(ModelHubMixin):
     def _from_pretrained(
         cls,
         model_id,
-        revision,
-        cache_dir,
-        force_download,
-        proxies,
-        resume_download,
-        local_files_only,
-        token,
+        revision=None,
+        cache_dir=None,
+        force_download=False,
+        proxies=None,
+        resume_download=None,
+        local_files_only=False,
+        token=None,
         dataset_name='',
         model_name='',
         map_location='cpu',
@@ -159,17 +159,20 @@ class PyGModelHubMixin(ModelHubMixin):
         if osp.isdir(model_id):
             model_file = osp.join(model_id, MODEL_WEIGHTS_NAME)
         else:
-            model_file = hf_hub_download(
+            download_kwargs = dict(
                 repo_id=model_id,
                 filename=MODEL_WEIGHTS_NAME,
                 revision=revision,
                 cache_dir=cache_dir,
                 force_download=force_download,
-                proxies=proxies,
-                resume_download=resume_download,
                 token=token,
                 local_files_only=local_files_only,
             )
+            if proxies is not None:
+                download_kwargs['proxies'] = proxies
+            if resume_download is not None:
+                download_kwargs['resume_download'] = resume_download
+            model_file = hf_hub_download(**download_kwargs)
 
         config = model_kwargs.pop('config', None)
         if config is not None:

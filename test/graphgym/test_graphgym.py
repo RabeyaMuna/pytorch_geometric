@@ -201,5 +201,5 @@ def test_train(destroy_process_group, tmp_path, capfd):
     trainer.fit(model, train_loader, val_loader)
 
     out, err = capfd.readouterr()
-    assert 'Sanity Checking' in out
-    assert 'Epoch 0:' in out
+    assert 'train:' in out
+    assert 'val:' in out
